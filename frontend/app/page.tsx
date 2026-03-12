@@ -17,12 +17,6 @@ export default function Home() {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-[#2e3348] bg-[#1a1d29]/50 px-6 py-3">
         <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
-        {inventory && (
-          <div className="flex gap-4 text-xs text-[#8b8fa3]">
-            <span>{inventory.nodes.length} resources</span>
-            <span>{inventory.links.length} connections</span>
-          </div>
-        )}
       </div>
 
       <div className="flex-1 overflow-hidden">

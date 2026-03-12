@@ -8,6 +8,7 @@ import GraphLegend from "./GraphLegend";
 import NodePopup from "./NodePopup";
 import { exportResources } from "@/lib/exportXlsx";
 import { useAccount } from "@/hooks/useAccount";
+import MultiSelect from "./MultiSelect";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 
@@ -33,6 +34,7 @@ export default function Graph({ nodes, links }: GraphProps) {
   const [highlightNodes, setHighlightNodes] = useState<Set<string>>(new Set());
   const [highlightLinks, setHighlightLinks] = useState<Set<string>>(new Set());
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
+  const [selectedVpcs, setSelectedVpcs] = useState<Set<string>>(new Set());
 
   // Build neighbor maps for highlighting
   const neighborMap = useRef<Map<string, Set<string>>>(new Map());
@@ -105,10 +107,26 @@ export default function Graph({ nodes, links }: GraphProps) {
     ),
   ].sort();
 
-  const visibleNodes =
+  const regionFiltered =
     selectedRegion === "all"
       ? nodes
       : nodes.filter((n) => n.region === selectedRegion || n.region === "global");
+
+  // Build VPC options from region-filtered nodes
+  const vpcOptions = regionFiltered
+    .filter((n) => n.service === "vpc" && n.resource_type === "VPC")
+    .map((n) => ({ value: n.id, label: n.label !== n.id ? `${n.label} (${n.id})` : n.id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const visibleNodes =
+    selectedVpcs.size === 0
+      ? regionFiltered
+      : regionFiltered.filter(
+          (n) =>
+            n.region === "global" ||
+            selectedVpcs.has(n.id) ||
+            selectedVpcs.has(String(n.metadata.vpc_id ?? ""))
+        );
 
   const visibleNodeIds = new Set(visibleNodes.map((n) => n.id));
   const visibleLinks = links.filter(
@@ -236,27 +254,42 @@ export default function Graph({ nodes, links }: GraphProps) {
         d3VelocityDecay={0.3}
       />
 
-      {/* Region filter + export */}
-      <div className="absolute left-4 top-4 flex items-center gap-2">
-        <label className="text-xs text-[#8b93b0]">Region</label>
-        <select
-          value={selectedRegion}
-          onChange={(e) => setSelectedRegion(e.target.value)}
-          className="rounded-md border border-[#2e3348] bg-[#1a1d29]/90 px-3 py-1.5 text-sm text-[#e4e6f0] backdrop-blur focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        >
-          <option value="all">All regions</option>
-          {regions.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-        {selectedRegion !== "all" && (
-          <span className="text-xs text-[#8b93b0]">
-            {visibleNodes.length} resources
-          </span>
+      {/* Filters + export */}
+      <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border border-[#2e3348] bg-[#1a1d29]/90 px-3 py-2 backdrop-blur">
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs text-[#8b93b0]">Region</label>
+          <select
+            value={selectedRegion}
+            onChange={(e) => { setSelectedRegion(e.target.value); setSelectedVpcs(new Set()); }}
+            className="rounded-md border border-[#2e3348] bg-[#252836] px-2 py-1 text-sm text-[#e4e6f0] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="all">All</option>
+            {regions.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="h-4 w-px bg-[#2e3348]" />
+
+        <MultiSelect
+          label="VPC"
+          options={vpcOptions}
+          selected={selectedVpcs}
+          onChange={setSelectedVpcs}
+          placeholder="All VPCs"
+          inline
+        />
+
+        {(selectedRegion !== "all" || selectedVpcs.size > 0) && (
+          <span className="text-xs text-[#8b93b0]">{visibleNodes.length} resources</span>
         )}
+
+        <div className="h-4 w-px bg-[#2e3348]" />
+
         <button
           onClick={() => void exportResources(graphNodes, selectedRegion, accountData?.account_name ?? "Unknown")}
-          className="flex items-center gap-1.5 rounded-lg border border-[#2e3348] bg-[#1a1d29]/90 px-3 py-1.5 text-sm text-[#e4e6f0] backdrop-blur transition-colors hover:border-indigo-500/50 hover:text-indigo-400"
+          className="flex items-center gap-1.5 text-sm text-[#e4e6f0] transition-colors hover:text-indigo-400"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

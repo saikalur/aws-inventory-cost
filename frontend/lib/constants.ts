@@ -28,6 +28,22 @@ export const SERVICE_LABELS: Record<string, string> = {
   sqs: "SQS",
 };
 
+// Keywords to match Cost Explorer full service names against our short service keys
+export const SERVICE_COST_KEYWORDS: Record<string, string[]> = {
+  ec2: ["EC2", "Elastic Compute Cloud"],
+  rds: ["RDS", "Relational Database"],
+  s3: ["S3", "Simple Storage"],
+  lambda: ["Lambda"],
+  vpc: ["VPC", "Virtual Private Cloud"],
+  route53: ["Route 53"],
+  elb: ["Elastic Load Balancing", "ELB"],
+  ecs: ["Elastic Container Service", "ECS"],
+  eks: ["Elastic Kubernetes", "EKS"],
+  dynamodb: ["DynamoDB"],
+  sns: ["Simple Notification", "SNS"],
+  sqs: ["Simple Queue", "SQS"],
+};
+
 // Node sizes by resource type importance
 export const NODE_SIZES: Record<string, number> = {
   VPC: 10,
