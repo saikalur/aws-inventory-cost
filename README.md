@@ -159,6 +159,9 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
+#### Note: 
+Feel free to configure certificate (LetsEncrypt or other sources) and configure to run under **pm2** on an AWS ec2 instance
+
 ---
 
 ## User Manual
