@@ -40,7 +40,7 @@ export const ADJUSTMENT_CATEGORIES = [
   {
     key: "marketplace",
     label: "AWS Marketplace",
-    keywords: ["marketplace"],
+    keywords: ["marketplace", "aws mp", "private offer"],
     color: "#a855f7",        // purple
   },
   {

@@ -37,7 +37,7 @@ def get_costs(
     kwargs = {
         "TimePeriod": {"Start": start_date, "End": end_date},
         "Granularity": granularity,
-        "Metrics": ["UnblendedCost"],
+        "Metrics": ["AmortizedCost"],
         "GroupBy": group_by,
     }
     if filters:
@@ -52,7 +52,7 @@ def get_costs(
         date_str = period["TimePeriod"]["Start"]
         for group in period.get("Groups", []):
             keys = group["Keys"]
-            amount = float(group["Metrics"]["UnblendedCost"]["Amount"])
+            amount = float(group["Metrics"]["AmortizedCost"]["Amount"])
             svc_name = keys[0] if len(keys) > 0 else ""
             rgn_name = keys[1] if len(keys) > 1 else ""
             total += amount
