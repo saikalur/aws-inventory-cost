@@ -28,6 +28,37 @@ export const SERVICE_LABELS: Record<string, string> = {
   sqs: "SQS",
 };
 
+// Adjustment categories — Tax, Marketplace, Discounts, Credits
+// Each entry: { label, keywords (case-insensitive), color }
+export const ADJUSTMENT_CATEGORIES = [
+  {
+    key: "tax",
+    label: "Tax",
+    keywords: ["tax"],
+    color: "#f97316",        // orange
+  },
+  {
+    key: "marketplace",
+    label: "AWS Marketplace",
+    keywords: ["marketplace"],
+    color: "#a855f7",        // purple
+  },
+  {
+    key: "discount",
+    label: "Discounts",
+    keywords: ["savings plan", "enterprise discount", "bundled discount", "edp discount", "discount"],
+    color: "#22c55e",        // green
+  },
+  {
+    key: "credit",
+    label: "Credits",
+    keywords: ["credit", "refund"],
+    color: "#06b6d4",        // cyan
+  },
+] as const;
+
+export type AdjustmentKey = typeof ADJUSTMENT_CATEGORIES[number]["key"];
+
 // Keywords to match Cost Explorer full service names against our short service keys
 export const SERVICE_COST_KEYWORDS: Record<string, string[]> = {
   ec2: ["EC2", "Elastic Compute Cloud"],
