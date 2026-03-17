@@ -9,6 +9,8 @@ interface CostParams {
   service?: string;
   region?: string;
   granularity?: string;
+  metric?: string;
+  linkedAccount?: string;
 }
 
 export function useCosts(params: CostParams = {}) {
@@ -21,6 +23,8 @@ export function useCosts(params: CostParams = {}) {
       service: params.service || "",
       region: params.region || "",
       granularity: params.granularity || "DAILY",
+      metric: params.metric || "NetAmortizedCost",
+      linked_account: params.linkedAccount || "",
     })
   );
 }
