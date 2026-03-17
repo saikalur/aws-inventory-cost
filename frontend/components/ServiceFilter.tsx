@@ -1,10 +1,5 @@
 "use client";
 
-interface LinkedAccount {
-  id: string;
-  name: string;
-}
-
 interface ServiceFilterProps {
   startDate: string;
   endDate: string;
@@ -12,8 +7,6 @@ interface ServiceFilterProps {
   region: string;
   granularity: string;
   metric: string;
-  linkedAccount: string;
-  linkedAccounts: LinkedAccount[];
   availableServices: string[];
   availableRegions: string[];
   onStartDateChange: (v: string) => void;
@@ -22,7 +15,6 @@ interface ServiceFilterProps {
   onRegionChange: (v: string) => void;
   onGranularityChange: (v: string) => void;
   onMetricChange: (v: string) => void;
-  onLinkedAccountChange: (v: string) => void;
 }
 
 export default function ServiceFilter(props: ServiceFilterProps) {
@@ -49,23 +41,6 @@ export default function ServiceFilter(props: ServiceFilterProps) {
           className={inputClass}
         />
       </div>
-      {props.linkedAccounts.length > 1 && (
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-[#8b8fa3]">Linked Account</label>
-          <select
-            value={props.linkedAccount}
-            onChange={(e) => props.onLinkedAccountChange(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">All Accounts</option>
-            {props.linkedAccounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name !== a.id ? `${a.name} (${a.id})` : a.id}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
       <div className="flex flex-col gap-1">
         <label className="text-xs text-[#8b8fa3]">Service</label>
         <select

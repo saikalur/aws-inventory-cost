@@ -7,12 +7,16 @@ import CostDashboard from "@/components/CostDashboard";
 import CredentialModal from "@/components/CredentialModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventory } from "@/hooks/useInventory";
+import { useLinkedAccounts } from "@/hooks/useLinkedAccounts";
 import { useProfile } from "@/lib/ProfileContext";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"graph" | "costs">("graph");
+  const [linkedAccount, setLinkedAccount] = useState("");
   const { profile, showCredentialPrompt, onCredentialsSet, dismissCredentialPrompt } = useProfile();
-  const { data: inventory, isLoading, error } = useInventory(profile);
+  const { data: linkedAccountsData } = useLinkedAccounts(profile);
+  const linkedAccounts = linkedAccountsData?.accounts ?? [];
+  const { data: inventory, isLoading, error } = useInventory(profile, linkedAccount);
 
   return (
     <div className="flex h-full flex-col">
@@ -26,6 +30,23 @@ export default function Home() {
 
       <div className="flex items-center justify-between border-b border-[#2e3348] bg-[#1a1d29]/50 px-6 py-3">
         <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+        {linkedAccounts.length > 1 && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-[#8b8fa3]">Account</label>
+            <select
+              value={linkedAccount}
+              onChange={(e) => setLinkedAccount(e.target.value)}
+              className="h-[34px] rounded-md border border-[#2e3348] bg-[#0f1117] px-3 py-1.5 text-sm text-[#e4e6f0] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="">All Accounts</option>
+              {linkedAccounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name !== a.id ? `${a.name} (${a.id})` : a.id}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-hidden">
@@ -47,7 +68,7 @@ export default function Home() {
             <Graph nodes={inventory.nodes} links={inventory.links} />
           ) : null
         ) : (
-          <CostDashboard />
+          <CostDashboard linkedAccount={linkedAccount} />
         )}
       </div>
     </div>

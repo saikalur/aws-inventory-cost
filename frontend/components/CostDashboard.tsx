@@ -6,7 +6,8 @@ import { useConfig } from "@/hooks/useConfig";
 import { useInventory } from "@/hooks/useInventory";
 import { useProfile } from "@/lib/ProfileContext";
 import { useAccount } from "@/hooks/useAccount";
-import { useLinkedAccounts } from "@/hooks/useLinkedAccounts";
+
+
 import ServiceFilter from "./ServiceFilter";
 import MultiSelect from "./MultiSelect";
 import CostBarChart from "./CostBarChart";
@@ -25,7 +26,7 @@ function classifyEntry(entry: CostEntry) {
   return "service";
 }
 
-export default function CostDashboard() {
+export default function CostDashboard({ linkedAccount }: { linkedAccount: string }) {
   const today = new Date().toISOString().split("T")[0];
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
     .toISOString()
@@ -37,12 +38,10 @@ export default function CostDashboard() {
   const [region, setRegion] = useState("");
   const [granularity, setGranularity] = useState("DAILY");
   const [metric, setMetric] = useState("NetAmortizedCost");
-  const [linkedAccount, setLinkedAccount] = useState("");
   const [selectedVpcs, setSelectedVpcs] = useState<Set<string>>(new Set());
 
   const { profile } = useProfile();
   const { data: accountData } = useAccount();
-  const { data: linkedAccountsData } = useLinkedAccounts(profile);
   const { data: config } = useConfig(profile);
   const { data: inventory, isLoading: inventoryLoading } = useInventory(profile);
   const { data, isLoading, error } = useCosts({
@@ -128,8 +127,6 @@ export default function CostDashboard() {
           region={region}
           granularity={granularity}
           metric={metric}
-          linkedAccount={linkedAccount}
-          linkedAccounts={linkedAccountsData?.accounts ?? []}
           availableServices={entryServices}
           availableRegions={config?.regions || entryRegions}
           onStartDateChange={setStartDate}
@@ -138,7 +135,6 @@ export default function CostDashboard() {
           onRegionChange={setRegion}
           onGranularityChange={setGranularity}
           onMetricChange={setMetric}
-          onLinkedAccountChange={setLinkedAccount}
         />
         <div className="flex items-end rounded-xl border border-[#2e3348] bg-[#1a1d29] px-4 py-4">
           {inventoryLoading ? (

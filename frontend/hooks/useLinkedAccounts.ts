@@ -12,9 +12,16 @@ interface LinkedAccountsResponse {
 
 export function useLinkedAccounts(profile?: string) {
   const key = JSON.stringify(["linked-accounts", profile]);
-  return useSWR<LinkedAccountsResponse>(key, () =>
-    fetchApi<LinkedAccountsResponse>("/api/linked-accounts", {
-      profile: profile || "",
-    })
+  return useSWR<LinkedAccountsResponse>(
+    key,
+    () =>
+      fetchApi<LinkedAccountsResponse>("/api/linked-accounts", {
+        profile: profile || "",
+      }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 600_000,
+    },
   );
 }

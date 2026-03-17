@@ -123,9 +123,27 @@ def account(profile: str = Query(default=None)):
     return AccountResponse(account_id=account_id, account_name=account_name)
 
 
+def _assume_role_session(base_session: boto3.Session, account_id: str) -> boto3.Session:
+    """Assume OrganizationAccountAccessRole in a linked account."""
+    sts = base_session.client("sts")
+    role_arn = f"arn:aws:iam::{account_id}:role/OrganizationAccountAccessRole"
+    resp = sts.assume_role(RoleArn=role_arn, RoleSessionName="inventory-reporter")
+    creds = resp["Credentials"]
+    return boto3.Session(
+        aws_access_key_id=creds["AccessKeyId"],
+        aws_secret_access_key=creds["SecretAccessKey"],
+        aws_session_token=creds["SessionToken"],
+    )
+
+
 @app.get("/api/inventory", response_model=InventoryResponse)
-def inventory(profile: str = Query(default=None)):
+def inventory(
+    profile: str = Query(default=None),
+    linked_account: str = Query(default=None),
+):
     session = _session(profile)
+    if linked_account:
+        session = _assume_role_session(session, linked_account)
     regions = get_configured_regions(session)
     services = get_configured_services()
     nodes, links = collect_inventory(regions, services, session)
