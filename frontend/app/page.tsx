@@ -4,17 +4,26 @@ import { useState } from "react";
 import TabNav from "@/components/TabNav";
 import Graph from "@/components/Graph";
 import CostDashboard from "@/components/CostDashboard";
+import CredentialModal from "@/components/CredentialModal";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useInventory } from "@/hooks/useInventory";
 import { useProfile } from "@/lib/ProfileContext";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"graph" | "costs">("graph");
-  const { profile } = useProfile();
+  const { profile, showCredentialPrompt, onCredentialsSet, dismissCredentialPrompt } = useProfile();
   const { data: inventory, isLoading, error } = useInventory(profile);
 
   return (
     <div className="flex h-full flex-col">
+      {showCredentialPrompt && (
+        <CredentialModal
+          profile={profile}
+          onSuccess={onCredentialsSet}
+          onCancel={dismissCredentialPrompt}
+        />
+      )}
+
       <div className="flex items-center justify-between border-b border-[#2e3348] bg-[#1a1d29]/50 px-6 py-3">
         <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
