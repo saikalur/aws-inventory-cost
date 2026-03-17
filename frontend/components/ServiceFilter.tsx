@@ -1,11 +1,19 @@
 "use client";
 
+interface LinkedAccount {
+  id: string;
+  name: string;
+}
+
 interface ServiceFilterProps {
   startDate: string;
   endDate: string;
   service: string;
   region: string;
   granularity: string;
+  metric: string;
+  linkedAccount: string;
+  linkedAccounts: LinkedAccount[];
   availableServices: string[];
   availableRegions: string[];
   onStartDateChange: (v: string) => void;
@@ -13,11 +21,13 @@ interface ServiceFilterProps {
   onServiceChange: (v: string) => void;
   onRegionChange: (v: string) => void;
   onGranularityChange: (v: string) => void;
+  onMetricChange: (v: string) => void;
+  onLinkedAccountChange: (v: string) => void;
 }
 
 export default function ServiceFilter(props: ServiceFilterProps) {
   const inputClass =
-    "rounded-lg border border-[#2e3348] bg-[#252836] px-3 py-2 text-sm text-[#e4e6f0] outline-none focus:border-indigo-500 transition-colors";
+    "h-[38px] min-w-[140px] rounded-lg border border-[#2e3348] bg-[#252836] px-3 py-2 text-sm text-[#e4e6f0] outline-none focus:border-indigo-500 transition-colors";
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-xl border border-[#2e3348] bg-[#1a1d29] p-4">
@@ -39,6 +49,23 @@ export default function ServiceFilter(props: ServiceFilterProps) {
           className={inputClass}
         />
       </div>
+      {props.linkedAccounts.length > 1 && (
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-[#8b8fa3]">Linked Account</label>
+          <select
+            value={props.linkedAccount}
+            onChange={(e) => props.onLinkedAccountChange(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">All Accounts</option>
+            {props.linkedAccounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name !== a.id ? `${a.name} (${a.id})` : a.id}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="flex flex-col gap-1">
         <label className="text-xs text-[#8b8fa3]">Service</label>
         <select
@@ -78,6 +105,20 @@ export default function ServiceFilter(props: ServiceFilterProps) {
         >
           <option value="DAILY">Daily</option>
           <option value="MONTHLY">Monthly</option>
+        </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-xs text-[#8b8fa3]">Cost Metric</label>
+        <select
+          value={props.metric}
+          onChange={(e) => props.onMetricChange(e.target.value)}
+          className={inputClass}
+        >
+          <option value="NetAmortizedCost">Net Amortized</option>
+          <option value="AmortizedCost">Amortized</option>
+          <option value="NetUnblendedCost">Net Unblended</option>
+          <option value="UnblendedCost">Unblended</option>
+          <option value="BlendedCost">Blended</option>
         </select>
       </div>
     </div>
