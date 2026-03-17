@@ -16,6 +16,7 @@ export interface GraphEdge {
 export interface InventoryResponse {
   nodes: GraphNode[];
   links: GraphEdge[];
+  warning?: string;
 }
 
 export interface CostEntry {

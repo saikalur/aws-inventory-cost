@@ -65,7 +65,16 @@ export default function Home() {
               </div>
             </div>
           ) : inventory ? (
-            <Graph nodes={inventory.nodes} links={inventory.links} />
+            <div className="flex h-full flex-col">
+              {inventory.warning && (
+                <div className="mx-6 mt-3 rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-xs text-orange-400">
+                  {inventory.warning}
+                </div>
+              )}
+              <div className="flex-1 overflow-hidden">
+                <Graph nodes={inventory.nodes} links={inventory.links} />
+              </div>
+            </div>
           ) : null
         ) : (
           <CostDashboard linkedAccount={linkedAccount} />

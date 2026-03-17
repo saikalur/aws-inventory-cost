@@ -123,11 +123,15 @@ def account(profile: str = Query(default=None)):
     return AccountResponse(account_id=account_id, account_name=account_name)
 
 
-def _assume_role_session(base_session: boto3.Session, account_id: str) -> boto3.Session:
-    """Assume OrganizationAccountAccessRole in a linked account."""
+def _assume_role_session(base_session: boto3.Session, account_id: str) -> boto3.Session | None:
+    """Try to assume OrganizationAccountAccessRole in a linked account.
+    Returns None if the role cannot be assumed."""
     sts = base_session.client("sts")
     role_arn = f"arn:aws:iam::{account_id}:role/OrganizationAccountAccessRole"
-    resp = sts.assume_role(RoleArn=role_arn, RoleSessionName="inventory-reporter")
+    try:
+        resp = sts.assume_role(RoleArn=role_arn, RoleSessionName="inventory-reporter")
+    except ClientError:
+        return None
     creds = resp["Credentials"]
     return boto3.Session(
         aws_access_key_id=creds["AccessKeyId"],
@@ -136,18 +140,28 @@ def _assume_role_session(base_session: boto3.Session, account_id: str) -> boto3.
     )
 
 
-@app.get("/api/inventory", response_model=InventoryResponse)
+@app.get("/api/inventory")
 def inventory(
     profile: str = Query(default=None),
     linked_account: str = Query(default=None),
 ):
     session = _session(profile)
+    cross_account_error = None
     if linked_account:
-        session = _assume_role_session(session, linked_account)
+        linked_session = _assume_role_session(session, linked_account)
+        if linked_session:
+            session = linked_session
+        else:
+            cross_account_error = (
+                f"Cannot access account {linked_account}. "
+                "Showing master account resources. "
+                "To view linked account resources, ensure OrganizationAccountAccessRole "
+                "exists in the target account, or provide credentials via the credential prompt."
+            )
     regions = get_configured_regions(session)
     services = get_configured_services()
     nodes, links = collect_inventory(regions, services, session)
-    return InventoryResponse(nodes=nodes, links=links)
+    return {"nodes": [n.dict() for n in nodes], "links": [e.dict() for e in links], "warning": cross_account_error}
 
 
 @app.get("/api/linked-accounts")
