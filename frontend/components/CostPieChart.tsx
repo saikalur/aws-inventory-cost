@@ -55,9 +55,10 @@ export default function CostPieChart({ entries }: CostPieChartProps) {
             backgroundColor: "#1a1d29",
             border: "1px solid #2e3348",
             borderRadius: "8px",
-            color: "#e4e6f0",
             fontSize: 12,
           }}
+          itemStyle={{ color: "#e4e6f0" }}
+          labelStyle={{ color: "#8b8fa3" }}
           formatter={(value: number) => formatCurrency(value)}
         />
         <Legend

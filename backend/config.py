@@ -14,13 +14,13 @@ ALL_SERVICES = [
 GLOBAL_SERVICES = {"s3", "route53"}
 
 
-def get_all_regions(session: boto3.Session | None = None) -> list[str]:
+def get_all_regions(session: boto3.Session | None = None ) -> list[str]:
     s = session or boto3.Session()
     client = s.client("ec2", region_name="us-east-1")
     return [r["RegionName"] for r in client.describe_regions()["Regions"]]
 
 
-def get_configured_regions(session: boto3.Session | None = None) -> list[str]:
+def get_configured_regions(session: boto3.Session | None = None ) -> list[str]:
     raw = os.getenv("REGIONS", "ALL").strip()
     if raw.upper() == "ALL":
         return get_all_regions(session)
